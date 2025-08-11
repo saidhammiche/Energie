@@ -88,11 +88,66 @@ export default function App() {
         ];
   });
 
+  // Aktionsplan - chargement depuis localStorage ou valeurs par défaut
+  const [aktionsplan, setAktionsplan] = useState(() => {
+    const gespeicherteAktionsplan = localStorage.getItem("aktionsplan");
+    return gespeicherteAktionsplan
+      ? JSON.parse(gespeicherteAktionsplan)
+      : [
+          {
+            aktion: "Aktionen zum operativen Ziel 1:",
+            kommentar: "Bei einem Durchschnitt von 818 Betriebsstunden aus 2019 wäre die Differenz der Anschaffungskosten bei 1710 geleisteten Stunden wieder zurückverdient",
+            berechnung: "Diesel: 20709€, Elektro: 23660€, Verbrauch: 2.75L/h vs 6.5kWh/h",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 2:",
+            kommentar: "Es wurden Angebote für einen Radlader des selben Typen wie der vorhandene, sowie für einen kleineren mit einem geringeren Verbauch eingeholt",
+            berechnung: "großer Radlader: 100000€, kleiner: 39900€, Verbrauch: 8.3L/h vs 6.5L/h",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 3:",
+            kommentar: "Das Lagerhaltungssystem wurde programmiert und kann vollständig genutzt werden.",
+            berechnung: "Einsparung pro Betriebsstunde Stapler: 2.9L → 3.19€",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 4:",
+            kommentar: "Das Thema sollte in den nächsten Jahren weiter verfolgt werden",
+            berechnung: "Wird aktuell nicht umgesetzt",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 5:",
+            kommentar: "An beiden Pressen ist für das Einlagern der fertig gepackten Paletten ein Elektrostapler im Einsatz.",
+            berechnung: "Im Jahr 2024 sind 5 von 8 Staplern elektrisch betrieben (79% der Stunden)",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 6:",
+            kommentar: "Es wurden je eine Baggerwaage bestellt und installiert.",
+            berechnung: "Energieverbrauch pro to an Presse 1 von 21.98kwh/to (2022) auf 17.54kwh/to (2024)",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 7:",
+            kommentar: "Ende 2021 wurden 2 elektrisch betriebene Stapler angeschafft",
+            berechnung: "Ziel wurde 2024 nicht komplett erreicht",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 8:",
+            kommentar: "2022 wurden 2 dieselbetriebene Stapler durch einen Elektrostapler ersetzt",
+            berechnung: "Ziel erreicht",
+          },
+          {
+            aktion: "Aktionen zum operativen Ziel 9:",
+            kommentar: "Der Verbrauch des mobile Equipment pro verarbeiteter Tonne wurde um 22% gesenkt.",
+            berechnung: "Verbrauch pro to: 2020=9.91kwh/to → 2024=7.72kwh/to",
+          },
+        ];
+  });
+
   // Sauvegarder dans localStorage à chaque changement
   useEffect(() => {
     localStorage.setItem("ziele", JSON.stringify(ziele));
     localStorage.setItem("operativeZiele", JSON.stringify(operativeZiele));
-  }, [ziele, operativeZiele]);
+    localStorage.setItem("aktionsplan", JSON.stringify(aktionsplan));
+  }, [ziele, operativeZiele, aktionsplan]);
 
   // États pour la nouvelle ligne à ajouter (strategische Ziele)
   const [neuZiel, setNeuZiel] = useState("");
@@ -102,14 +157,46 @@ export default function App() {
   const [neuOperativesZiel, setNeuOperativesZiel] = useState("");
   const [neuOperativerFortschritt, setNeuOperativerFortschritt] = useState("");
 
-  // État pour l'édition : index de la ligne en édition, sinon null
+  // États pour la nouvelle ligne à ajouter (Aktionsplan)
+  const [neuAktion, setNeuAktion] = useState("");
+  const [neuKommentar, setNeuKommentar] = useState("");
+  const [neuBerechnung, setNeuBerechnung] = useState("");
+
+  // État pour l'édition
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingOperativeIndex, setEditingOperativeIndex] = useState(null);
+  const [editingAktionsplanIndex, setEditingAktionsplanIndex] = useState(null);
+  
   // États temporaires pour modifier la ligne
   const [editZiel, setEditZiel] = useState("");
   const [editFortschritt, setEditFortschritt] = useState("");
   const [editOperativesZiel, setEditOperativesZiel] = useState("");
   const [editOperativerFortschritt, setEditOperativerFortschritt] = useState("");
+  const [editAktion, setEditAktion] = useState("");
+  const [editKommentar, setEditKommentar] = useState("");
+  const [editBerechnung, setEditBerechnung] = useState("");
+  // Ajoute ces états avec les autres useState
+const [energieziel, setEnergieziel] = useState(() => {
+  const gespeichert = localStorage.getItem("energieziel");
+  return gespeichert || "Übergeordnetes Energieziel für Aktionsplan 2020-2024\n\nVerbesserung des Gesamtenergieverbrauches pro verarbeiteter Tonne um 20% bis 2024";
+});
+
+const [bewertung, setBewertung] = useState(() => {
+  const gespeichert = localStorage.getItem("bewertung");
+  return gespeichert || `Bewertung der Kennzahlen\n\nAuf Grund der Inbetriebnahme des Palettierroboters an Presse 1 ist der Energieverbrauch pro Tonne im Jahr 2022 angestiegen.\nVor allem in der ersten Phase des Aufbaus wurde Energie verbaucht, aber fast nichts gepresst.\n\nIm Jahr 2023 wird diese Kennzahl eine positvere Entwicklung aufweisen\n\nDer Energieverbrauch pro Betriebsstunde konnte für jeweiligen Bagger der Presse 1 und 2 in den Jahren 2021 und 2022 verbessert werden.\nIm Jahr 2024 wurde der spezifische Energieverbrauch für Presse 1 gesenkt\n\n\n\n\n\nGeprüft. Aktuell zurückgestellt`;
+});
+
+// Ajoute ces effets pour sauvegarder
+useEffect(() => {
+  localStorage.setItem("energieziel", energieziel);
+  localStorage.setItem("bewertung", bewertung);
+}, [energieziel, bewertung]);
+
+// États pour l'édition
+const [editingEnergieziel, setEditingEnergieziel] = useState(false);
+const [editingBewertung, setEditingBewertung] = useState(false);
+const [tempEnergieziel, setTempEnergieziel] = useState("");
+const [tempBewertung, setTempBewertung] = useState("");
 
   // Ajout d'un nouvel objectif stratégique
   function addZiel(e) {
@@ -135,7 +222,6 @@ export default function App() {
     if (neuOperativerFortschritt < 0 || neuOperativerFortschritt > 100)
       return alert("Fortschritt muss zwischen 0 und 100 sein");
 
-    // Ajoute automatiquement "Operatives Ziel X:" si ce n'est pas déjà présent
     const formattedZiel = neuOperativesZiel.startsWith("Operatives Ziel")
       ? neuOperativesZiel
       : `Operatives Ziel ${operativeZiele.length + 1}: ${neuOperativesZiel}`;
@@ -146,6 +232,25 @@ export default function App() {
     ]);
     setNeuOperativesZiel("");
     setNeuOperativerFortschritt("");
+  }
+
+  // Ajout d'un nouvel item d'aktionsplan
+  function addAktionsplan(e) {
+    e.preventDefault();
+    if (!neuAktion || !neuKommentar || !neuBerechnung)
+      return alert("Bitte alle Felder ausfüllen");
+
+    setAktionsplan([
+      ...aktionsplan,
+      { 
+        aktion: neuAktion,
+        kommentar: neuKommentar,
+        berechnung: neuBerechnung
+      },
+    ]);
+    setNeuAktion("");
+    setNeuKommentar("");
+    setNeuBerechnung("");
   }
 
   // Supprimer une ligne stratégique
@@ -159,6 +264,13 @@ export default function App() {
   function deleteOperativesZiel(index) {
     if (window.confirm("Möchten Sie dieses operative Ziel wirklich löschen?")) {
       setOperativeZiele(operativeZiele.filter((_, i) => i !== index));
+    }
+  }
+
+  // Supprimer une ligne d'aktionsplan
+  function deleteAktionsplan(index) {
+    if (window.confirm("Möchten Sie diesen Aktionsplan-Eintrag wirklich löschen?")) {
+      setAktionsplan(aktionsplan.filter((_, i) => i !== index));
     }
   }
 
@@ -176,6 +288,14 @@ export default function App() {
     setEditOperativerFortschritt(parseInt(operativeZiele[index].fortschritt));
   }
 
+  // Commencer à éditer une ligne d'aktionsplan
+  function startAktionsplanEdit(index) {
+    setEditingAktionsplanIndex(index);
+    setEditAktion(aktionsplan[index].aktion);
+    setEditKommentar(aktionsplan[index].kommentar);
+    setEditBerechnung(aktionsplan[index].berechnung);
+  }
+
   // Annuler l'édition
   function cancelEdit() {
     setEditingIndex(null);
@@ -187,6 +307,13 @@ export default function App() {
     setEditingOperativeIndex(null);
     setEditOperativesZiel("");
     setEditOperativerFortschritt("");
+  }
+
+  function cancelAktionsplanEdit() {
+    setEditingAktionsplanIndex(null);
+    setEditAktion("");
+    setEditKommentar("");
+    setEditBerechnung("");
   }
 
   // Enregistrer la modification stratégique
@@ -227,6 +354,22 @@ export default function App() {
     cancelOperativeEdit();
   }
 
+  // Enregistrer la modification d'aktionsplan
+  function saveAktionsplanEdit(index) {
+    if (!editAktion || !editKommentar || !editBerechnung) {
+      alert("Bitte alle Felder ausfüllen");
+      return;
+    }
+    const neueAktionsplan = [...aktionsplan];
+    neueAktionsplan[index] = {
+      aktion: editAktion,
+      kommentar: editKommentar,
+      berechnung: editBerechnung
+    };
+    setAktionsplan(neueAktionsplan);
+    cancelAktionsplanEdit();
+  }
+
   const getFortschrittIcon = (percent) => {
     const num = parseInt(percent);
     if (num === 100) return "✅";
@@ -236,19 +379,49 @@ export default function App() {
 
   const getProgressBarColor = (percent) => {
     const num = parseInt(percent);
-    if (num === 100) return "#28a745"; // vert
-    if (num >= 50) return "#ffc107"; // jaune/orange
-    return "#dc3545"; // rouge
+    if (num === 100) return "#28a745";
+    if (num >= 50) return "#ffc107";
+    return "#dc3545";
   };
+// Ajoute avec les autres fonctions
+function startEditEnergieziel() {
+  setTempEnergieziel(energieziel);
+  setEditingEnergieziel(true);
+}
 
-  const styles = {
-    container: {
-      padding: 20,
-      maxWidth: 900,
-      margin: "auto",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      color: "#003366",
-    },
+function saveEnergieziel() {
+  setEnergieziel(tempEnergieziel);
+  setEditingEnergieziel(false);
+}
+
+function cancelEditEnergieziel() {
+  setEditingEnergieziel(false);
+}
+
+function startEditBewertung() {
+  setTempBewertung(bewertung);
+  setEditingBewertung(true);
+}
+
+function saveBewertung() {
+  setBewertung(tempBewertung);
+  setEditingBewertung(false);
+}
+
+function cancelEditBewertung() {
+  setEditingBewertung(false);
+}
+ const styles = {
+  container: {
+    padding: 20,
+    maxWidth: 850, 
+    margin: "auto",
+    marginLeft: "120px", 
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    color: "#003366",
+  },
+
+
     table: {
       borderCollapse: "collapse",
       width: "100%",
@@ -328,7 +501,7 @@ export default function App() {
       border: "none",
       cursor: "pointer",
       fontWeight: "600",
-      marginRight: 8,
+      whiteSpace: "nowrap",
     },
     editButton: {
       backgroundColor: "#007bff",
@@ -365,6 +538,9 @@ export default function App() {
       padding: "10px 15px",
       textAlign: "center",
       border: "1px solid #ddd",
+      display: "flex",
+      gap: "8px",
+      justifyContent: "center",
     },
     sectionTitle: {
       marginTop: 40,
@@ -377,7 +553,7 @@ export default function App() {
 
   return (
     <div style={styles.container}>
-      <h1>Strategische Ziele & Fortschritt</h1>
+      <h2  style={styles.sectionTitle}> Strategische Ziele & Fortschritt</h2>
 
       <table style={styles.table}>
         <thead>
@@ -517,7 +693,7 @@ export default function App() {
         </button>
       </form>
 
-      <h2 style={styles.sectionTitle}>Operative Ziele 2020-2024</h2>
+      <h2 style={styles.sectionTitle}>Operative Ziele 2020- ...</h2>
 
       <table style={styles.table}>
         <thead>
@@ -656,6 +832,276 @@ export default function App() {
           Operatives Ziel hinzufügen
         </button>
       </form>
+
+      <h2 style={styles.sectionTitle}>Aktionsplan zur Erreichung der operativen Ziele</h2>
+
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.th}>Aktion</th>
+            <th style={styles.th}>Kommentare zur Umsetzung</th>
+            <th style={styles.th}>Berechnung</th>
+            <th style={styles.th}>Aktionen</th>
+            <th style={styles.th}>Auswertung</th>
+          </tr>
+        </thead>
+        <tbody>
+          {aktionsplan.map((item, index) => (
+            <React.Fragment key={index}>
+              <tr>
+                <td style={styles.td}>
+                  {editingAktionsplanIndex === index ? (
+                    <textarea
+                      style={styles.inputEdit}
+                      value={editAktion}
+                      onChange={(e) => setEditAktion(e.target.value)}
+                      rows={3}
+                    />
+                  ) : (
+                    item.aktion
+                  )}
+                </td>
+                <td style={styles.td}>
+                  {editingAktionsplanIndex === index ? (
+                    <textarea
+                      style={styles.inputEdit}
+                      value={editKommentar}
+                      onChange={(e) => setEditKommentar(e.target.value)}
+                      rows={3}
+                    />
+                  ) : (
+                    item.kommentar
+                  )}
+                </td>
+                <td style={styles.td}>
+                  {editingAktionsplanIndex === index ? (
+                    <textarea
+                      style={styles.inputEdit}
+                      value={editBerechnung}
+                      onChange={(e) => setEditBerechnung(e.target.value)}
+                      rows={3}
+                    />
+                  ) : (
+                    item.berechnung
+                  )}
+                </td>
+                <td style={styles.actionCell}>
+                  {editingAktionsplanIndex === index ? (
+                    <>
+                      <button
+                        style={{ ...styles.buttonSmall, ...styles.saveButton }}
+                        onClick={() => saveAktionsplanEdit(index)}
+                      >
+                        Speichern
+                      </button>
+                      <button
+                        style={{ ...styles.buttonSmall, ...styles.cancelButton }}
+                        onClick={cancelAktionsplanEdit}
+                      >
+                        Abbrechen
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        style={{ ...styles.buttonSmall, ...styles.editButton }}
+                        onClick={() => startAktionsplanEdit(index)}
+                      >
+                        Bearbeiten
+                      </button>
+                      <button
+                        style={{ ...styles.buttonSmall, ...styles.deleteButton }}
+                        onClick={() => deleteAktionsplan(index)}
+                      >
+                        Löschen
+                      </button>
+                    </>
+                  )}
+                </td>
+                <td style={styles.td}>
+                  {index === 0 ? (
+                    <>
+                      Siehe Reiter{" "}
+                      <a
+                        href="/auswertung"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Auswertung AP 20-24
+                      </a>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </td>
+              </tr>
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
+
+      <form onSubmit={addAktionsplan} style={styles.form}>
+        <label style={styles.label} htmlFor="neuAktion">
+          Neue Aktion:
+        </label>
+        <textarea
+          id="neuAktion"
+          style={styles.textarea}
+          value={neuAktion}
+          onChange={(e) => setNeuAktion(e.target.value)}
+          required
+          rows={2}
+          placeholder="Neue Aktion eingeben (z.B. 'Aktionen zum operativen Ziel X:')"
+        />
+
+        <label style={styles.label} htmlFor="neuKommentar">
+          Kommentare zur Umsetzung:
+        </label>
+        <textarea
+          id="neuKommentar"
+          style={styles.textarea}
+          value={neuKommentar}
+          onChange={(e) => setNeuKommentar(e.target.value)}
+          required
+          rows={3}
+          placeholder="Kommentare zur Umsetzung eingeben"
+        />
+
+        <label style={styles.label} htmlFor="neuBerechnung">
+          Berechnung:
+        </label>
+        <textarea
+          id="neuBerechnung"
+          style={styles.textarea}
+          value={neuBerechnung}
+          onChange={(e) => setNeuBerechnung(e.target.value)}
+          required
+          rows={3}
+          placeholder="Berechnungen oder Kennzahlen eingeben"
+        />
+
+        <button type="submit" style={styles.button}>
+          Aktionsplan-Eintrag hinzufügen
+        </button>
+      </form>
+
+      {/* Ajoute ces sections avant ou après tes autres sections */}
+
+<h2 style={styles.sectionTitle}>Übergeordnetes Energieziel für Aktionsplan 2020- ...</h2>
+<div style={{ 
+  backgroundColor: "#f9f9f9", 
+  padding: 20, 
+  borderRadius: 8,
+  marginBottom: 30,
+  position: "relative"
+}}>
+  {editingEnergieziel ? (
+    <>
+      <textarea
+        style={{ 
+          ...styles.textarea,
+          minHeight: 100,
+          width: "100%",
+          marginBottom: 10
+        }}
+        value={tempEnergieziel}
+        onChange={(e) => setTempEnergieziel(e.target.value)}
+      />
+      <div style={{ display: "flex", gap: 10 }}>
+        <button
+          style={{ ...styles.buttonSmall, ...styles.saveButton }}
+          onClick={saveEnergieziel}
+        >
+          Speichern
+        </button>
+        <button
+          style={{ ...styles.buttonSmall, ...styles.cancelButton }}
+          onClick={cancelEditEnergieziel}
+        >
+          Abbrechen
+        </button>
+      </div>
+    </>
+  ) : (
+    <>
+      <pre style={{ 
+        whiteSpace: "pre-wrap", 
+        fontFamily: "inherit",
+        margin: 0
+      }}>{energieziel}</pre>
+      <button
+        style={{ 
+          ...styles.buttonSmall, 
+          ...styles.editButton,
+          position: "absolute",
+          top: 10,
+          right: 10
+        }}
+        onClick={startEditEnergieziel}
+      >
+        Bearbeiten
+      </button>
+    </>
+  )}
+</div>
+
+<h2 style={styles.sectionTitle}>Bewertung der Kennzahlen</h2>
+<div style={{ 
+  backgroundColor: "#f9f9f9", 
+  padding: 20, 
+  borderRadius: 8,
+  marginBottom: 30,
+  position: "relative"
+}}>
+  {editingBewertung ? (
+    <>
+      <textarea
+        style={{ 
+          ...styles.textarea,
+          minHeight: 200,
+          width: "100%",
+          marginBottom: 10
+        }}
+        value={tempBewertung}
+        onChange={(e) => setTempBewertung(e.target.value)}
+      />
+      <div style={{ display: "flex", gap: 10 }}>
+        <button
+          style={{ ...styles.buttonSmall, ...styles.saveButton }}
+          onClick={saveBewertung}
+        >
+          Speichern
+        </button>
+        <button
+          style={{ ...styles.buttonSmall, ...styles.cancelButton }}
+          onClick={cancelEditBewertung}
+        >
+          Abbrechen
+        </button>
+      </div>
+    </>
+  ) : (
+    <>
+      <pre style={{ 
+        whiteSpace: "pre-wrap", 
+        fontFamily: "inherit",
+        margin: 0
+      }}>{bewertung}</pre>
+      <button
+        style={{ 
+          ...styles.buttonSmall, 
+          ...styles.editButton,
+          position: "absolute",
+          top: 10,
+          right: 10
+        }}
+        onClick={startEditBewertung}
+      >
+        Bearbeiten
+      </button>
+    </>
+  )}
+</div>
     </div>
   );
 }
